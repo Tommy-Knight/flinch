@@ -474,7 +474,19 @@ public class FlinchPlugin extends Plugin
 
 		try
 		{
-			return Integer.parseInt(stored.trim());
+			final int animationId = Integer.parseInt(stored.trim());
+
+			// An id the catalogue no longer knows, such as an NPC animation saved by an older
+			// build, is treated as unset. Without this the panel shows None while the trigger
+			// quietly keeps playing the animation that is no longer selectable.
+			if (animationId != FlinchAnimation.NO_ANIMATION
+				&& catalogue.byId(animationId).getId() == FlinchAnimation.NO_ANIMATION)
+			{
+				log.debug("Dropping unknown stored animation {} for trigger {}", animationId, trigger);
+				return trigger.getDefaultAnimationId();
+			}
+
+			return animationId;
 		}
 		catch (NumberFormatException e)
 		{
