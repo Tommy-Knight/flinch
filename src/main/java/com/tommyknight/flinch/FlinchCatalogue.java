@@ -20,10 +20,13 @@ import net.runelite.api.gameval.AnimationID;
 /**
  * The selectable animations, loaded once from animations.tsv.
  *
- * The TSV is a dump of every sequence id in the game with its gameval constant name. Reading
- * ids from data rather than naming ~14,000 constants in code keeps the plugin decoupled from
- * whichever client release it is compiled against — a renamed constant can no longer break the
+ * The TSV lists every animation built on the human rig, with its gameval constant name. Reading
+ * ids from data rather than naming ~1,500 constants in code keeps the plugin decoupled from
+ * whichever client release it is compiled against: a renamed constant can no longer break the
  * build, and a new one does not need a code change.
+ *
+ * NPC and scenery animations are deliberately absent. Animations belong to a skeleton, so those
+ * render as a mangled mess on a player model.
  */
 @Singleton
 @Slf4j
@@ -34,8 +37,8 @@ class FlinchCatalogue
 	/**
 	 * The player emotes, pinned to the top of the list with readable names.
 	 *
-	 * Everything else — dodges, deaths, the rest of the human rig, then the NPC animations —
-	 * still appears below, so nothing is lost by keeping this list to the familiar ones.
+	 * The rest of the human rig still appears below, so nothing is lost by keeping this list to
+	 * the familiar ones.
 	 */
 	private static final Map<Integer, String> FAVOURITES = new LinkedHashMap<>();
 
@@ -88,9 +91,8 @@ class FlinchCatalogue
 	private boolean loaded;
 
 	/**
-	 * Every animation, ordered favourites, then the rest of the human rig, then NPC and scenery.
-	 * Scrubbing from the top therefore only reaches the ones that look wrong on a player if you
-	 * keep going.
+	 * Every animation, ordered favourites first, then the rest of the human rig by name.
+	 * Favourites first makes the familiar emotes the ones you land on when scrolling from the top.
 	 */
 	synchronized List<FlinchAnimation> getAllAnimations()
 	{
@@ -153,7 +155,7 @@ class FlinchCatalogue
 			if (in == null)
 			{
 				log.warn("Missing animation catalogue resource {}", RESOURCE);
-				buildLists(Collections.emptyList(), Collections.emptyList());
+				buildLists(Collections.emptyList());
 				return;
 			}
 
@@ -186,38 +188,27 @@ class FlinchCatalogue
 		}
 
 		final List<FlinchAnimation> player = new ArrayList<>();
-		final List<FlinchAnimation> other = new ArrayList<>();
 
 		for (Map.Entry<Integer, String> entry : names.entrySet())
 		{
 			final int id = entry.getKey();
-			final String gamevalName = entry.getValue();
-
 			if (FAVOURITES.containsKey(id))
 			{
 				continue;
 			}
 
-			if (isPlayerRig(gamevalName))
-			{
-				player.add(new FlinchAnimation(id, pretty(gamevalName, true), gamevalName, FlinchAnimation.Group.PLAYER));
-			}
-			else
-			{
-				other.add(new FlinchAnimation(id, pretty(gamevalName, false), gamevalName, FlinchAnimation.Group.OTHER));
-			}
+			final String gamevalName = entry.getValue();
+			player.add(new FlinchAnimation(id, pretty(gamevalName), gamevalName, FlinchAnimation.Group.PLAYER));
 		}
 
-		final Comparator<FlinchAnimation> byName = Comparator
+		player.sort(Comparator
 			.comparing(FlinchAnimation::getDisplayName, String.CASE_INSENSITIVE_ORDER)
-			.thenComparingInt(FlinchAnimation::getId);
-		player.sort(byName);
-		other.sort(byName);
+			.thenComparingInt(FlinchAnimation::getId));
 
-		buildLists(player, other);
+		buildLists(player);
 	}
 
-	private void buildLists(List<FlinchAnimation> player, List<FlinchAnimation> other)
+	private void buildLists(List<FlinchAnimation> player)
 	{
 		final List<FlinchAnimation> favourites = new ArrayList<>();
 		for (Map.Entry<Integer, String> entry : FAVOURITES.entrySet())
@@ -226,12 +217,10 @@ class FlinchCatalogue
 				FlinchAnimation.Group.FAVOURITE));
 		}
 
-		final List<FlinchAnimation> everything =
-			new ArrayList<>(1 + favourites.size() + player.size() + other.size());
+		final List<FlinchAnimation> everything = new ArrayList<>(1 + favourites.size() + player.size());
 		everything.add(FlinchAnimation.NONE);
 		everything.addAll(favourites);
 		everything.addAll(player);
-		everything.addAll(other);
 		allAnimations = Collections.unmodifiableList(everything);
 
 		byId.clear();
@@ -241,28 +230,16 @@ class FlinchCatalogue
 		}
 	}
 
-	/**
-	 * Animations belong to a skeleton. HUMAN_ and EMOTE_ are the player rig; anything else was
-	 * authored for an NPC or a piece of scenery and generally renders as a mess on a player.
-	 */
-	private static boolean isPlayerRig(String gamevalName)
-	{
-		return gamevalName.startsWith("HUMAN_") || gamevalName.startsWith("EMOTE_");
-	}
-
-	private static String pretty(String gamevalName, boolean stripRigPrefix)
+	private static String pretty(String gamevalName)
 	{
 		String name = gamevalName;
-		if (stripRigPrefix)
+		if (name.startsWith("HUMAN_"))
 		{
-			if (name.startsWith("HUMAN_"))
-			{
-				name = name.substring("HUMAN_".length());
-			}
-			else if (name.startsWith("EMOTE_"))
-			{
-				name = name.substring("EMOTE_".length());
-			}
+			name = name.substring("HUMAN_".length());
+		}
+		else if (name.startsWith("EMOTE_"))
+		{
+			name = name.substring("EMOTE_".length());
 		}
 
 		name = name.replace('_', ' ').toLowerCase(Locale.ROOT).trim();

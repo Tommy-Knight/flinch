@@ -1,9 +1,9 @@
 # Flinch
 
-Play an animation on your own character when something happens to you in combat.
+Choose an animation for blocking or receiving damage.
 
 Take a 0 and dodge. Take a hit and panic. Get poisoned and shrug. It is entirely cosmetic and
-entirely client-side — nobody else sees it, and nothing is sent to the server.
+entirely client-side, so nobody else sees it and nothing is sent to the server.
 
 ## Triggers
 
@@ -19,17 +19,16 @@ Each trigger has its own animation, and any of them can be left on **None**.
 
 ## Choosing an animation
 
-Every sequence in the game is available — around 14,000 of them. The list is ordered so the
-useful ones come first: the player emotes, then the rest of the human rig, then NPC and scenery
-animations last.
+Around 1,500 animations are available: every one in the game built on the human rig, with the
+familiar player emotes pinned to the top of the list.
 
 - **Type to search** any dropdown. It matches the name, the underlying gameval constant, and the
   raw id.
 - **Arrow up and down** to preview. Each animation plays on your character as you pass it, so you
-  can hear nothing and see everything before committing.
+  can see exactly what you are picking before committing.
 
-Animations belong to a skeleton, so the NPC ones near the bottom of the list will look wrong on a
-player. They are included anyway, because some of them are funnier that way.
+NPC and scenery animations are deliberately left out. Animations belong to a skeleton, so those
+render as a mangled mess on a player model.
 
 ## Animation cancel
 
@@ -38,7 +37,7 @@ Off by default: your own attack swings interrupt the animation, as they normally
 On: the animation holds its ground against your swings, resuming at the frame it would have
 reached rather than restarting, so a fast weapon no longer cuts it short.
 
-Either way, clicking to walk, attack or interact cancels the animation immediately — you are
+Either way, clicking to walk, attack or interact cancels the animation immediately, so you are
 never stuck waiting for one to finish.
 
 ## Settings

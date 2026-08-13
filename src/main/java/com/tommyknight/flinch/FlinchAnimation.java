@@ -24,10 +24,8 @@ final class FlinchAnimation
 		NONE,
 		/** Hand-picked and hand-named, listed first. */
 		FAVOURITE,
-		/** Everything else built on the human rig — safe on a player model. */
-		PLAYER,
-		/** NPC and scenery rigs. Listed last, and most of them look wrong on a player. */
-		OTHER
+		/** Everything else built on the human rig, safe on a player model. */
+		PLAYER
 	}
 
 	private final int id;

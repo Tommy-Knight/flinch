@@ -46,7 +46,7 @@ class FlinchPanel extends PluginPanel
 	/** A one-character query matches thousands of entries; only the first screenful is ever read. */
 	private static final int MAX_SEARCH_RESULTS = 250;
 
-	/** Fixes the combo box cell width up front so Swing never measures all 14,000 rows. */
+	/** Fixes the combo box cell width up front so Swing never measures all 1,500 rows. */
 	private static final FlinchAnimation PROTOTYPE =
 		new FlinchAnimation(-2, "Wwwwwwwwwwwwwwwwwwww", "", FlinchAnimation.Group.NONE);
 
@@ -183,7 +183,7 @@ class FlinchPanel extends PluginPanel
 		});
 	}
 
-	// ── Search ──────────────────────────────────────────────────────────────
+	// --- Search ---
 
 	/** Whether the user is mid-query, during which the combo must not rewrite the editor. */
 	private static final class SearchState
@@ -232,7 +232,7 @@ class FlinchPanel extends PluginPanel
 	 * A combo box model that can narrow itself to a subset without being replaced.
 	 *
 	 * Swapping in a whole new model resets the combo's editor, which fires document events,
-	 * which filter again — an infinite loop. Filtering in place leaves the editor alone and
+	 * which filter again, an infinite loop. Filtering in place leaves the editor alone and
 	 * only tells the popup its contents changed.
 	 */
 	private static final class FilterModel extends AbstractListModel<FlinchAnimation>
@@ -293,7 +293,7 @@ class FlinchPanel extends PluginPanel
 		}
 	}
 
-	// ── Construction helpers ────────────────────────────────────────────────
+	// --- Construction helpers ---
 
 	private static String describe(FlinchAnimation animation)
 	{
@@ -357,7 +357,7 @@ class FlinchPanel extends PluginPanel
 		editor.setToolTipText("Type to search, or use the up and down arrow keys to preview");
 
 		// While the user is typing, the combo must stop writing the selected animation's name
-		// back into the editor — otherwise each keystroke restores the old text and appends to
+		// back into the editor. Otherwise each keystroke restores the old text and appends to
 		// it, and deleting is impossible because the name reappears. The look and feel's own
 		// editor component is kept so the field still looks native; only setItem is gated.
 		final SearchState search = new SearchState();
@@ -434,7 +434,7 @@ class FlinchPanel extends PluginPanel
 		});
 
 		// Filtering hangs off real key presses rather than the editor's document, so a
-		// programmatic selection — which also rewrites the editor text — never narrows the
+		// programmatic selection, which also rewrites the editor text, never narrows the
 		// list. Navigation keys are ignored for the same reason: arrowing through results
 		// must not re-filter to whatever the highlighted entry happens to be called.
 		editor.addKeyListener(new KeyAdapter()
@@ -456,7 +456,7 @@ class FlinchPanel extends PluginPanel
 					case KeyEvent.VK_ENTER:
 					case KeyEvent.VK_ESCAPE:
 						// Arrowing onto an entry already saved it, so there is nothing pending
-						// to commit or discard — both keys just end the search.
+						// to commit or discard, so both keys just end the search.
 						endSearch(combo, model, trigger, search);
 						return;
 
@@ -508,7 +508,7 @@ class FlinchPanel extends PluginPanel
 	 * Wraps a component for the vertical stack.
 	 *
 	 * BoxLayout positions children by their alignmentX, so a stack that mixes defaults ends up
-	 * visibly ragged — every row has to declare the same alignment. It also honours maximum
+	 * visibly ragged, so every row has to declare the same alignment. It also honours maximum
 	 * size, so an uncapped row stretches to fill spare vertical space. Gaps are borders rather
 	 * than strut components for the same alignment reason.
 	 */

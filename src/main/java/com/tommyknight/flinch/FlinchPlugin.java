@@ -30,8 +30,7 @@ import net.runelite.client.util.ImageUtil;
 @PluginDescriptor(
 	name = "Flinch",
 	description = "Play an emote or dodge animation on yourself when you take a 0, take damage or get poisoned",
-	tags = {"animation", "emote", "dodge", "hitsplat", "cosmetic", "flinch"},
-	enabledByDefault = false
+	tags = {"animation", "emote", "dodge", "hitsplat", "cosmetic", "flinch"}
 )
 @Slf4j
 public class FlinchPlugin extends Plugin
@@ -63,7 +62,7 @@ public class FlinchPlugin extends Plugin
 	 * Set when a hitsplat lands, applied on the following GameTick.
 	 *
 	 * Being hit makes the server play the weapon's block animation, and that arrives in the
-	 * same update packet as the hitsplat — so anything applied from the hitsplat handler is
+	 * same update packet as the hitsplat, so anything applied from the hitsplat handler is
 	 * immediately overwritten. GameTick is posted once that packet has been fully processed,
 	 * which is the first moment our animation can survive.
 	 */
@@ -73,7 +72,7 @@ public class FlinchPlugin extends Plugin
 	private int lastTriggerTick = -1;
 
 	/**
-	 * Many animations hold their final frame instead of ending — the death poses leave you face
+	 * Many animations hold their final frame instead of ending. The death poses leave you face
 	 * down, and Uri's vanish leaves you invisible. The client only restores the idle pose when
 	 * the animation is cleared, so we clear it ourselves once it has had time to play out.
 	 */
@@ -124,7 +123,7 @@ public class FlinchPlugin extends Plugin
 		pendingAnimationId = FlinchAnimation.NO_ANIMATION;
 	}
 
-	// ── Events ──────────────────────────────────────────────────────────────
+	// --- Events ---
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
@@ -178,7 +177,7 @@ public class FlinchPlugin extends Plugin
 			return;
 		}
 
-		// Walking out from under an animation counts as taking control back too — the click that
+		// Walking out from under an animation counts as taking control back too, because the click that
 		// started the walk may have happened before the animation did.
 		final WorldPoint location = location();
 		final boolean moved = location != null && lastLocation != null && !location.equals(lastLocation);
@@ -206,7 +205,7 @@ public class FlinchPlugin extends Plugin
 	 *
 	 * A fast weapon swings again before a flinch has finished, and the attack animation wins
 	 * because it arrives later. With animation cancel on the flinch is meant to be the thing
-	 * that wins, so it is re-applied — at the frame it would have reached, not from the start,
+	 * that wins, so it is re-applied at the frame it would have reached, not from the start,
 	 * so it plays through once rather than stuttering back to the beginning on every swing.
 	 */
 	private void holdAnimation()
@@ -270,7 +269,7 @@ public class FlinchPlugin extends Plugin
 		}
 	}
 
-	// ── Trigger resolution ──────────────────────────────────────────────────
+	// --- Trigger resolution ---
 
 	private FlinchTrigger classify(Hitsplat hitsplat)
 	{
@@ -295,8 +294,8 @@ public class FlinchPlugin extends Plugin
 	}
 
 	/**
-	 * Only the "me" hitsplat families land on the local player. Everything else — prayer drain,
-	 * disease, corruption, stat changes — has its own type and must not count as damage.
+	 * Only the "me" hitsplat families land on the local player. Everything else, such as prayer drain,
+	 * disease, corruption and stat changes, has its own type and must not count as damage.
 	 */
 	private static boolean isDamageToPlayer(int hitsplatType)
 	{
@@ -337,7 +336,7 @@ public class FlinchPlugin extends Plugin
 
 		// With animation cancel off, a flinch already playing is allowed to finish rather than
 		// being restarted by the next hit. The server's own block animation is never treated as
-		// a reason to skip — replacing it is the entire feature.
+		// a reason to skip, because replacing it is the entire feature.
 		if (!isAnimationCancel() && activeAnimationId != FlinchAnimation.NO_ANIMATION)
 		{
 			return;
@@ -441,7 +440,7 @@ public class FlinchPlugin extends Plugin
 		});
 	}
 
-	// ── Settings, persisted through ConfigManager rather than @ConfigItem ────
+	// --- Settings, persisted through ConfigManager rather than @ConfigItem ---
 	// The panel is the whole UI, so these keys are deliberately not rendered in the
 	// config panel. They still save and sync like any other config value.
 
